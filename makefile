@@ -1,5 +1,3 @@
-
-
 CC = gcc
 CFLAGS = -std=c11 -O2 -march=native -mavx512f -mavx512bw -I.
 
