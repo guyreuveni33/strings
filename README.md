@@ -28,7 +28,7 @@ To run the program, execute `./part1.out` in the terminal. Follow the on-screen 
 
 1. **Clone the Repository:**
    ```
-   git clone <repository_url>
+   git clone https://github.com/guyreuveni33/strings_distance.git
    ```
 
 2. **Navigate to the Repository Directory:**
