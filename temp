@@ -1,0 +1,52 @@
+#include "libstr.h"
+
+#include <stdint.h>
+#include <string.h>
+#include <immintrin.h>  // This header is for Intel intrinsics, adjust if using a different architecture
+
+#define MAX_STR 100
+
+int b64_distance(char str1[MAX_STR], char str2[MAX_STR]) {
+    // Remove non-base 64 characters
+    char cleaned_str1[MAX_STR];
+    char cleaned_str2[MAX_STR];
+
+    int j1 = 0, j2 = 0;
+    for (int i = 0; i < strlen(str1); i++) {
+        if ((str1[i] >= 'A' && str1[i] <= 'Z') || (str1[i] >= 'a' && str1[i] <= 'z') || (str1[i] >= '0' && str1[i] <= '9') || str1[i] == '+' || str1[i] == '/') {
+            cleaned_str1[j1++] = str1[i];
+        }
+    }
+    cleaned_str1[j1] = '\0';
+
+    for (int i = 0; i < strlen(str2); i++) {
+        if ((str2[i] >= 'A' && str2[i] <= 'Z') || (str2[i] >= 'a' && str2[i] <= 'z') || (str2[i] >= '0' && str2[i] <= '9') || str2[i] == '+' || str2[i] == '/') {
+            cleaned_str2[j2++] = str2[i];
+        }
+    }
+    cleaned_str2[j2] = '\0';
+
+    // Calculate the numbers represented by the strings
+    __m256i result1 = _mm256_setzero_si256();
+    __m256i result2 = _mm256_setzero_si256();
+
+    for (int i = 0; i < j1; i += 32) {
+        __m256i chunk = _mm256_loadu_si256((__m256i *)&cleaned_str1[i]);
+        result1 = _mm256_add_epi64(result1, chunk);
+    }
+
+    for (int i = 0; i < j2; i += 32) {
+        __m256i chunk = _mm256_loadu_si256((__m256i *)&cleaned_str2[i]);
+        result2 = _mm256_add_epi64(result2, chunk);
+    }
+
+    // Subtract the first from the second
+    __m256i result = _mm256_sub_epi64(result2, result1);
+
+    // Extract the result as a 64-bit integer
+    int64_t distance;
+    _mm256_storeu_si256((__m256i *)&distance, result);
+
+    // Return the result
+    return (int)distance;
+}
